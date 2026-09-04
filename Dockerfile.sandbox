@@ -1,0 +1,11 @@
+FROM python:3.11-slim
+
+WORKDIR /sandbox
+
+# 安装容器内运行 Excel/Word 解析所需的依赖
+RUN pip install --no-cache-dir openpyxl==3.1.0 python-docx==1.0.0
+
+# 容器入口脚本（由 container_office_cli.py 映射）
+COPY backend/app/sandbox/container_runner.py /sandbox/container_runner.py
+
+ENTRYPOINT ["python", "/sandbox/container_runner.py"]

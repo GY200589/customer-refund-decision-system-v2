@@ -1,0 +1,16 @@
+# 环境变量与密钥，任何情况下不得提交（.env 规则在任意目录层级生效）
+.env
+*.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node / 前端构建产物
+node_modules/
+frontend/dist/
+
+# 运行产物
+uploads/
+logs/

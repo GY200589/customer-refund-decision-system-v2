@@ -1,0 +1,106 @@
+{
+  "report_id": "assistant_eval_1788442397",
+  "kind": "assistant",
+  "created_at": "2026-09-03T13:33:17.185299+00:00",
+  "total": 48,
+  "metrics": {
+    "intent_micro_f1": 1.0,
+    "intent_macro_f1": 1.0,
+    "multi_intent_exact_rate": 1.0,
+    "entity_accuracy": 1.0,
+    "rag_retrieval_hit_rate": 1.0,
+    "citation_coverage": 1.0,
+    "unsupported_answer_rate": 0.0,
+    "action_accuracy": 1.0,
+    "avg_latency_ms": 2.7,
+    "voice_vs_text": {
+      "text": {
+        "n": 30,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "voice": {
+        "n": 5,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      }
+    }
+  },
+  "per_intent": {
+    "product_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 7
+    },
+    "refund_create": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 6
+    },
+    "complaint": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 5
+    },
+    "order_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 5
+    },
+    "return_policy_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 2
+    },
+    "category_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 5
+    },
+    "store_info_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 1
+    },
+    "refund_status": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 5
+    },
+    "other": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 1
+    },
+    "size_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 1
+    },
+    "logistics_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 3
+    }
+  },
+  "sample_counts": {
+    "intent": 35,
+    "entity": 18,
+    "rag": 13,
+    "action": 19
+  },
+  "errors": []
+}

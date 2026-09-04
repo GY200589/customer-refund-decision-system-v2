@@ -1,0 +1,181 @@
+{
+  "report_id": "assistant_eval_1788425605",
+  "kind": "assistant",
+  "created_at": "2026-09-03T08:53:25.766218+00:00",
+  "total": 40,
+  "metrics": {
+    "intent_micro_f1": 0.928,
+    "intent_macro_f1": 0.9,
+    "multi_intent_exact_rate": 0.9,
+    "entity_accuracy": 1.0,
+    "rag_retrieval_hit_rate": 1.0,
+    "citation_coverage": 1.0,
+    "unsupported_answer_rate": 0.0,
+    "action_accuracy": 0.941,
+    "avg_latency_ms": 1.5,
+    "voice_vs_text": {
+      "text": {
+        "n": 25,
+        "precision": 1.0,
+        "recall": 0.933,
+        "f1": 0.966
+      },
+      "voice": {
+        "n": 5,
+        "precision": 0.8,
+        "recall": 0.667,
+        "f1": 0.727
+      }
+    }
+  },
+  "per_intent": {
+    "return_policy_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 2
+    },
+    "other": {
+      "precision": 0.667,
+      "recall": 1.0,
+      "f1": 0.8,
+      "support": 2
+    },
+    "size_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 1
+    },
+    "refund_create": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 6
+    },
+    "product_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 5
+    },
+    "category_query": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 5
+    },
+    "refund_status": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 4
+    },
+    "complaint": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 4
+    },
+    "order_query": {
+      "precision": 1.0,
+      "recall": 0.25,
+      "f1": 0.4,
+      "support": 4
+    },
+    "logistics_query": {
+      "precision": 1.0,
+      "recall": 0.667,
+      "f1": 0.8,
+      "support": 3
+    }
+  },
+  "sample_counts": {
+    "intent": 30,
+    "entity": 14,
+    "rag": 10,
+    "action": 17
+  },
+  "errors": [
+    {
+      "id": "intent-002",
+      "query": "收到的不是我买的黑色休闲裤，我想退款",
+      "input_source": "text",
+      "expected_intents": [
+        "refund_create",
+        "complaint",
+        "order_query"
+      ],
+      "predicted_intents": [
+        "refund_create",
+        "complaint"
+      ],
+      "expected_entities": {
+        "color": "黑色",
+        "product_type": "休闲裤"
+      },
+      "predicted_entities": {
+        "color": "黑色",
+        "product_type": "休闲裤"
+      },
+      "expected_sources": null,
+      "retrieved_doc_keys": [
+        "process_guide",
+        "refund_policy",
+        "ocr_guide"
+      ],
+      "expected_action": "create_refund",
+      "predicted_action": "create_refund"
+    },
+    {
+      "id": "voice-002",
+      "query": "我买的牛仔裤到哪儿了什么时候送到",
+      "input_source": "voice",
+      "expected_intents": [
+        "order_query",
+        "logistics_query"
+      ],
+      "predicted_intents": [
+        "other"
+      ],
+      "expected_entities": {
+        "product_type": "牛仔裤"
+      },
+      "predicted_entities": {
+        "product_type": "牛仔裤"
+      },
+      "expected_sources": null,
+      "retrieved_doc_keys": [
+        "size_guide_bottom",
+        "category_guide",
+        "risk_explain"
+      ],
+      "expected_action": "query_order",
+      "predicted_action": "human_handoff"
+    },
+    {
+      "id": "action-002",
+      "query": "我要退昨天买的那条西裤",
+      "input_source": "text",
+      "expected_intents": [
+        "refund_create",
+        "order_query"
+      ],
+      "predicted_intents": [
+        "refund_create"
+      ],
+      "expected_entities": {
+        "product_type": "西裤"
+      },
+      "predicted_entities": {
+        "product_type": "西裤"
+      },
+      "expected_sources": null,
+      "retrieved_doc_keys": [
+        "category_guide"
+      ],
+      "expected_action": "create_refund",
+      "predicted_action": "create_refund"
+    }
+  ]
+}

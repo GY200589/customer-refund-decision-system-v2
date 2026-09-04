@@ -1,0 +1,37 @@
+{
+  "name": "customer-portal",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "test:smoke": "node scripts/smoke.mjs",
+    "test:refund-smoke": "node scripts/refund-optimization-smoke.mjs"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.5.0",
+    "antd": "^5.18.3",
+    "axios": "^1.7.2",
+    "i18next": "^23.12.1",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-i18next": "^12.3.1",
+    "react-router-dom": "^6.25.1",
+    "recharts": "^2.12.7",
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "playwright-core": "^1.55.0",
+    "vite": "^5.0.0"
+  }
+}

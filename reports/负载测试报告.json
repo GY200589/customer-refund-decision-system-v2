@@ -1,0 +1,70 @@
+{
+  "stages": [
+    {
+      "requests": 6147,
+      "failures": 0,
+      "rps": 139.1,
+      "p95_ms": 98.0,
+      "median_ms": 23.0,
+      "avg_ms": 41.5,
+      "error_rate_pct": 0.0,
+      "users": 50
+    },
+    {
+      "requests": 11565,
+      "failures": 0,
+      "rps": 261.7,
+      "p95_ms": 690.0,
+      "median_ms": 380.0,
+      "avg_ms": 395.7,
+      "error_rate_pct": 0.0,
+      "users": 200
+    },
+    {
+      "requests": 10871,
+      "failures": 0,
+      "rps": 242.5,
+      "p95_ms": 2300.0,
+      "median_ms": 1600.0,
+      "avg_ms": 1457.9,
+      "error_rate_pct": 0.0,
+      "users": 500
+    },
+    {
+      "requests": 5026,
+      "failures": 142,
+      "rps": 113.2,
+      "p95_ms": 20000.0,
+      "median_ms": 1400.0,
+      "avg_ms": 3010.0,
+      "error_rate_pct": 2.825,
+      "users": 1000
+    }
+  ],
+  "verdicts": [
+    {
+      "users": 50,
+      "qps_ok": false,
+      "p95_ok": true,
+      "err_ok": true
+    },
+    {
+      "users": 200,
+      "qps_ok": true,
+      "p95_ok": false,
+      "err_ok": true
+    },
+    {
+      "users": 500,
+      "qps_ok": true,
+      "p95_ok": false,
+      "err_ok": true
+    },
+    {
+      "users": 1000,
+      "qps_ok": false,
+      "p95_ok": false,
+      "err_ok": false
+    }
+  ]
+}

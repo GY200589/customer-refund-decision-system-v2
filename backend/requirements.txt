@@ -1,0 +1,33 @@
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30
+pydantic>=2.7,<3.0
+pydantic-settings>=2.3
+SQLAlchemy>=2.0.30,<3.0
+alembic>=1.13
+psycopg[binary]>=3.1
+redis>=5.0,<6.0
+langgraph>=0.2.60
+langgraph-checkpoint-redis>=0.5.0
+PyJWT>=2.8,<3.0
+bcrypt>=4.1,<5.0
+httpx>=0.27
+python-multipart>=0.0.9
+pytest>=8.2
+
+# ── 工单5 增强依赖 ──
+langfuse>=2.0.0
+openpyxl>=3.1.0
+python-docx>=1.0.0
+tiktoken>=0.5.0
+
+# ── 真实 OCR（可选，体积较大）──
+# 启用方式：安装后设置 OCR_PROVIDER=paddle（未安装时自动回退 mock）。
+# 本地 .venv 已安装并验证：paddleocr 3.7.0 + paddlepaddle 3.3.1(CPU) + numpy 2.3.5。
+# 注意：Docker 镜像默认不装（约 +2GB），且 Paddle 模型每进程约占 400MB+，
+# 若在容器启用需调大内存限制并减少 UVICORN_WORKERS。
+# paddlepaddle>=3.0
+# paddleocr>=3.0
+# pymupdf>=1.24          # PDF 转图（免装 poppler）
+# pillow>=10.0
+# pdf2image>=1.17        # 可选：PyMuPDF 不可用时的 PDF 兜底（需系统 poppler）
+

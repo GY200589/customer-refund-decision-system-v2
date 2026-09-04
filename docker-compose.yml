@@ -1,0 +1,207 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: refund-postgres
+    # 提高连接上限，容纳 backend 多 worker 的连接池（默认 100 不够）；
+    # 并做基础性能调优（shared_buffers/effective_cache_size/work_mem 对齐 2G 内存上限）
+    command:
+      - postgres
+      - -c
+      - max_connections=400
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - effective_cache_size=1536MB
+      - -c
+      - work_mem=8MB
+      - -c
+      - checkpoint_completion_target=0.9
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-refund}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-refund_password}
+      POSTGRES_DB: ${POSTGRES_DB:-refund_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-refund} -d ${POSTGRES_DB:-refund_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "8.0"
+          memory: 2G
+
+  redis:
+    # redis-stack-server 内置 RedisJSON，LangGraph 的 Redis 检查点（JSON.SET）依赖该模块
+    # 注意：不要覆盖 command，否则 entrypoint.sh 不会加载 RedisJSON/RediSearch 模块
+    image: redis/redis-stack-server:7.4.0-v4
+    container_name: refund-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+
+  backend:
+    build: ./backend
+    container_name: refund-api
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-secret}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-480}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-refund}:${POSTGRES_PASSWORD:-refund_password}@postgres:5432/${POSTGRES_DB:-refund_db}
+      REDIS_URL: redis://redis:6379/0
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-4}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-20}
+      DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-40}
+      DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT:-10}
+      DB_POOL_RECYCLE: ${DB_POOL_RECYCLE:-1800}
+      AMOUNT_HUMAN_REVIEW_THRESHOLD_CENT: ${AMOUNT_HUMAN_REVIEW_THRESHOLD_CENT:-30000}
+      OCR_CONFIDENCE_THRESHOLD: ${OCR_CONFIDENCE_THRESHOLD:-0.80}
+      FRAUD_REJECT_THRESHOLD: ${FRAUD_REJECT_THRESHOLD:-80}
+      FRAUD_REVIEW_THRESHOLD: ${FRAUD_REVIEW_THRESHOLD:-50}
+      OCR_PROVIDER: ${OCR_PROVIDER:-mock}
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      RISK_PROVIDER: ${RISK_PROVIDER:-mock}
+      SENTIMENT_PROVIDER: ${SENTIMENT_PROVIDER:-mock}
+      REFUND_PROVIDER: ${REFUND_PROVIDER:-mock}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      ASR_PROVIDER: ${ASR_PROVIDER:-mock}
+      ASR_MODEL: ${ASR_MODEL:-qwen3-asr-flash}
+      CATALOG_DATA_PATH: /app/catalog_data/商品标签表.json
+      KNOWLEDGE_BASE_PATH: /app/knowledge/客服知识库-RAG.md
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      DEEPSEEK_TIMEOUT_SECONDS: ${DEEPSEEK_TIMEOUT_SECONDS:-20}
+      VISION_PROVIDER: ${VISION_PROVIDER:-mock}
+      VISION_MODEL: ${VISION_MODEL:-qwen2.5vl}
+      UPLOAD_DIR: /app/uploads
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+      LANGFUSE_HOST: ${LANGFUSE_HOST:-https://cloud.langfuse.com}
+    ports:
+      - "8001:8000"
+    volumes:
+      # Uploads are consumed asynchronously by the worker; both containers
+      # must see the same files.
+      - uploads_data:/app/uploads
+      # The API reads Trace files produced by the worker for the dashboard.
+      - traces_data:/app/logs/traces
+      # 商品标签和客服知识库以只读方式注入，重建镜像不会改动原始资料。
+      - ./男装:/app/catalog_data:ro
+      - ./RAG/data:/app/knowledge:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 2G
+
+  worker:
+    build: ./backend
+    container_name: refund-worker
+    command: ["python", "-m", "app.worker.main"]
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-refund}:${POSTGRES_PASSWORD:-refund_password}@postgres:5432/${POSTGRES_DB:-refund_db}
+      REDIS_URL: redis://redis:6379/0
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-20}
+      DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-40}
+      DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT:-10}
+      DB_POOL_RECYCLE: ${DB_POOL_RECYCLE:-1800}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-4}
+      WORKER_BATCH_SIZE: ${WORKER_BATCH_SIZE:-8}
+      AMOUNT_HUMAN_REVIEW_THRESHOLD_CENT: ${AMOUNT_HUMAN_REVIEW_THRESHOLD_CENT:-30000}
+      OCR_CONFIDENCE_THRESHOLD: ${OCR_CONFIDENCE_THRESHOLD:-0.80}
+      FRAUD_REJECT_THRESHOLD: ${FRAUD_REJECT_THRESHOLD:-80}
+      FRAUD_REVIEW_THRESHOLD: ${FRAUD_REVIEW_THRESHOLD:-50}
+      OCR_PROVIDER: ${OCR_PROVIDER:-mock}
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      RISK_PROVIDER: ${RISK_PROVIDER:-mock}
+      SENTIMENT_PROVIDER: ${SENTIMENT_PROVIDER:-mock}
+      REFUND_PROVIDER: ${REFUND_PROVIDER:-mock}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      ASR_PROVIDER: ${ASR_PROVIDER:-mock}
+      ASR_MODEL: ${ASR_MODEL:-qwen3-asr-flash}
+      VISION_PROVIDER: ${VISION_PROVIDER:-mock}
+      VISION_MODEL: ${VISION_MODEL:-qwen2.5vl}
+      UPLOAD_DIR: /app/uploads
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+      LANGFUSE_HOST: ${LANGFUSE_HOST:-https://cloud.langfuse.com}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/app/uploads
+      - traces_data:/app/logs/traces
+    healthcheck:
+      # 探测 Worker 心跳（Redis 键 worker:heartbeat），15s 内未刷新即判定不健康
+      test: ["CMD", "python", "-c", "import redis,time; r=redis.from_url('redis://redis:6379/0'); v=r.get('worker:heartbeat'); exit(0 if v and time.time()-float(v)<15 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 1G
+
+  frontend:
+    build: ./frontend
+    container_name: refund-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+  traces_data:

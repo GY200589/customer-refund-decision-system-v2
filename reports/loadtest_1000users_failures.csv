@@ -1,0 +1,6 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+POST,/api/v1/cases/{id}/decision,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/cases/{id}/decision'),8,2026-08-18T13:47:38Z,2026-08-18T13:47:53Z
+POST,/api/v1/cases,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/cases'),61,2026-08-18T13:47:38Z,2026-08-18T13:47:53Z
+GET,/api/v1/cases/{id},HTTPError('500 Server Error: Internal Server Error for url: /api/v1/cases/{id}'),15,2026-08-18T13:47:39Z,2026-08-18T13:47:53Z
+GET,/api/v1/review-tasks,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/review-tasks'),2,2026-08-18T13:47:39Z,2026-08-18T13:47:50Z
+GET,/api/v1/cases?limit=20,HTTPError('500 Server Error: Internal Server Error for url: /api/v1/cases?limit=20'),56,2026-08-18T13:47:39Z,2026-08-18T13:47:53Z
